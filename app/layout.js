@@ -1,6 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
+import Navbar from "@/Component/Navbar";
+import FloatingCTAButton from "@/Component/Floatingctabutton"
+import WhatsAppCTAButton from "@/Component/Whatsappctabutton"
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -22,7 +24,22 @@ export default function RootLayout({ children }) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Navbar />
+
+        <WhatsAppCTAButton className="mb-15"
+          phoneNumber="9106550601"
+          message="Hi! I'd like to know more about your products."
+          tooltipText="Hi! How can we help you? 👋"
+          showTooltip={true}
+        />
+
+        <FloatingCTAButton
+          href="#distribution"
+          text="Become Distributor"
+        />
+        {children}
+      </body>
     </html>
   );
 }
