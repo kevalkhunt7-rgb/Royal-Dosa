@@ -317,7 +317,7 @@ export default function HeroSection() {
       <style suppressHydrationWarning>{GLOBAL_STYLES}</style>
 
       <section id="home"
-        className="font-body mt-[-100] relative w-full overflow-hidden"
+        className="font-body mt-[-100]  relative w-full overflow-hidden pt-15 md:pt-2 lg:pt-2"
         style={{
           background: "linear-gradient(148deg, #f6faf0 0%, #eef7e4 35%, #faf7ec 70%, #fdf9f0 100%)",
           minHeight: "100vh",
@@ -423,7 +423,7 @@ export default function HeroSection() {
             {mounted && (
               <div className="anim-slideRight d-100">
                 <span
-                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold"
+                  className="inline-flex items-center gap-2  px-4 py-1.5 rounded-full text-xs font-semibold"
                   style={{
                     background: "rgba(245,197,24,0.16)",
                     border: "1.5px solid rgba(245,197,24,0.42)",
