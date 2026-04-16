@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
 import Image from "next/image";
 
 // ─── Global Styles ───────────────────────────────────────────────────────────
@@ -9,6 +8,9 @@ const GLOBAL_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; }
+
+  /* Prevent horizontal overflow globally within the section */
+  #hero-section { overflow-x: hidden; }
 
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(36px); }
@@ -73,10 +75,6 @@ const GLOBAL_STYLES = `
   @keyframes bgPulse {
     0%,100% { opacity: 0.45; }
     50%      { opacity: 0.70; }
-  }
-  @keyframes glowPulse {
-    0%,100% { box-shadow: 0 0 0 0 rgba(26,122,74,0); }
-    50%      { box-shadow: 0 0 0 12px rgba(26,122,74,0.15); }
   }
   @keyframes ringExpand {
     0%   { transform: translate(-50%,-50%) scale(0.85); opacity: 0.7; }
@@ -154,22 +152,57 @@ const GLOBAL_STYLES = `
     animation: shimmerText 4s linear infinite;
   }
 
-  /* Hero grid */
+  /* ─── HERO LAYOUT ─────────────────────────────────────────────────────────── */
+
+  /* Mobile: single column, product image on top, copy below */
   .hero-grid {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: end;
-    gap: 0 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
   }
-  @media (max-width: 900px) {
+
+  /* Desktop (≥900px): three-column grid */
+  @media (min-width: 900px) {
     .hero-grid {
-      grid-template-columns: 1fr;
-      grid-template-rows: auto auto auto;
-      align-items: center;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: end;
+      gap: 0 2rem;
     }
-    .hero-left  { order: 2; text-align: center; }
-    .hero-center{ order: 1; }
-    .hero-right { order: 3; }
+    .hero-left  { order: unset; text-align: left; }
+    .hero-center{ order: unset; }
+    .hero-right { order: unset; }
+  }
+
+  /* Mobile ordering */
+  .hero-right  { order: 1; }
+  .hero-center { order: 2; }
+  .hero-left   { order: 3; text-align: center; }
+
+  @media (min-width: 900px) {
+    .hero-right  { order: unset; }
+    .hero-center { order: unset; }
+    .hero-left   { order: unset; }
+  }
+
+  /* Product image container — fluid on mobile, fixed on desktop */
+  .product-img-wrap {
+    position: relative;
+    width: min(300px, 80vw);
+    height: min(420px, 60vw);
+  }
+  @media (min-width: 640px) {
+    .product-img-wrap {
+      width: 360px;
+      height: 520px;
+    }
+  }
+  @media (min-width: 900px) {
+    .product-img-wrap {
+      width: 400px;
+      height: 600px;
+    }
   }
 
   /* Buttons */
@@ -213,7 +246,6 @@ const GLOBAL_STYLES = `
   }
   .product-wrap:hover {
     filter: drop-shadow(0 22px 44px rgba(245,197,24,0.7)) brightness(1.08);
-   rotate(-2deg) translateY(-6px);
   }
 
   /* Speech bubble */
@@ -227,9 +259,8 @@ const GLOBAL_STYLES = `
     line-height: 1.5;
     color: #222;
     box-shadow: 0 6px 24px rgba(0,0,0,0.10);
-    white-space: nowrap;
-    max-width: 220px;
     white-space: normal;
+    max-width: 220px;
     z-index: 40;
   }
   .bubble::after {
@@ -270,6 +301,16 @@ const GLOBAL_STYLES = `
   .crispy-badge:hover .badge-inner {
     animation: spinSlow 2s linear infinite;
   }
+
+  /* Decorative ring — hide on very small screens to avoid overflow */
+  .deco-ring {
+    display: none;
+  }
+  @media (min-width: 640px) {
+    .deco-ring {
+      display: block;
+    }
+  }
 `;
 
 const TRUST_BADGES = [
@@ -290,22 +331,12 @@ const TICKER_ITEMS = [
 export default function HeroSection() {
   const [mounted, setMounted] = useState(false);
   const [productBubble, setProductBubble] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 60);
     return () => clearTimeout(t);
   }, []);
-  const [hovered, setHovered] = useState(false);
-  const handleAnnaClick = () => {
-    const msgs = [
-      "Try Yellow Jalapeño Paper! 🌶️",
-      "Crispiest dosa in Gujarat! 😋",
-      "Made with love & tradition ❤️",
-      "Fresh every day, guaranteed! ✓",
-      "Vanakkam! Taste South India! 🙏",
-    ];
-
-  };
 
   const handleProductClick = () => {
     setProductBubble(true);
@@ -316,11 +347,13 @@ export default function HeroSection() {
     <>
       <style suppressHydrationWarning>{GLOBAL_STYLES}</style>
 
-      <section id="home"
-        className="font-body mt-[-100]  relative w-full overflow-hidden pt-15 md:pt-2 lg:pt-2"
+      <section
+        id="hero-section"
+        className="font-body relative w-full"
         style={{
           background: "linear-gradient(148deg, #f6faf0 0%, #eef7e4 35%, #faf7ec 70%, #fdf9f0 100%)",
           minHeight: "100vh",
+          overflowX: "hidden",
         }}
       >
         {/* ── Animated background orbs ── */}
@@ -375,9 +408,9 @@ export default function HeroSection() {
           />
         ))}
 
-        {/* ── Spinning decorative ring (top-right corner) ── */}
+        {/* ── Spinning decorative ring (top-right corner) — hidden on mobile ── */}
         <div
-          className="anim-spinSlow mt-[-100px] pointer-events-none absolute"
+          className="deco-ring anim-spinSlow pointer-events-none absolute"
           style={{
             top: 40, right: 60,
             width: 90, height: 90,
@@ -386,7 +419,7 @@ export default function HeroSection() {
           }}
         />
         <div
-          className="pointer-events-none absolute "
+          className="deco-ring pointer-events-none absolute"
           style={{
             top: 52, right: 72,
             width: 66, height: 66,
@@ -395,9 +428,9 @@ export default function HeroSection() {
           }}
         />
 
-        {/* ── Watermark text ── */}
+        {/* ── Watermark text — only on larger screens ── */}
         <div
-          className="font-hero pointer-events-none absolute select-none"
+          className="deco-ring font-hero pointer-events-none absolute select-none"
           style={{
             right: 18, top: "50%",
             transform: "translateY(-50%) rotate(90deg)",
@@ -409,21 +442,27 @@ export default function HeroSection() {
         </div>
 
         {/* ══════════════════════════════════════════════
-            HERO GRID  — Left | Center (Anna) | Right (product)
+            HERO GRID
         ══════════════════════════════════════════════ */}
         <div
-          className="hero-grid relative max-w-7xl mx-auto px-6 lg:px-12"
-          style={{ paddingTop: "clamp(60px, 10vh, 120px)", paddingBottom: 0, minHeight: "88vh" }}
+          className="hero-grid relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12"
+          style={{
+            paddingTop: "clamp(48px, 8vh, 120px)",
+            paddingBottom: 0,
+            minHeight: "88vh",
+          }}
         >
 
           {/* ════════ LEFT — copy ════════ */}
-          <div className="hero-left flex flex-col gap-5 pb-16 z-10" style={{ maxWidth: 420 }}>
-
+          <div
+            className="hero-left flex flex-col gap-4 md:gap-5 pb-8 md:pb-16 z-10 w-full"
+            style={{ maxWidth: 420, margin: "0 auto" }}
+          >
             {/* Pill tag */}
             {mounted && (
-              <div className="anim-slideRight d-100">
+              <div className="anim-slideRight d-100 flex justify-center md:justify-start">
                 <span
-                  className="inline-flex items-center gap-2  px-4 py-1.5 rounded-full text-xs font-semibold"
+                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold"
                   style={{
                     background: "rgba(245,197,24,0.16)",
                     border: "1.5px solid rgba(245,197,24,0.42)",
@@ -443,7 +482,7 @@ export default function HeroSection() {
               <h1
                 className="font-hero anim-fadeUp d-200"
                 style={{
-                  fontSize: "clamp(2rem, 3.8vw, 3.2rem)",
+                  fontSize: "clamp(1.75rem, 5vw, 3.2rem)",
                   lineHeight: 1.14,
                   color: "#111",
                   letterSpacing: "-0.01em",
@@ -460,7 +499,7 @@ export default function HeroSection() {
             {/* Sub copy */}
             {mounted && (
               <p
-                className="anim-fadeUp d-400"
+                className="anim-fadeUp d-400 mx-auto md:mx-0"
                 style={{
                   color: "#556", fontSize: "0.93rem",
                   lineHeight: 1.72, maxWidth: 340,
@@ -473,7 +512,7 @@ export default function HeroSection() {
 
             {/* CTA buttons */}
             {mounted && (
-              <div className="anim-fadeUp d-500 flex flex-wrap gap-3 mt-1">
+              <div className="anim-fadeUp d-500 flex flex-wrap justify-center md:justify-start gap-3 mt-1">
                 <button
                   className="btn-primary flex items-center gap-2 px-6 py-3 rounded-full text-white font-semibold text-sm"
                   style={{ background: "linear-gradient(135deg, #1a7a4a 0%, #16a34a 100%)" }}
@@ -494,7 +533,7 @@ export default function HeroSection() {
 
             {/* Trust checkmarks */}
             {mounted && (
-              <div className="anim-fadeUp d-700 flex flex-wrap gap-x-5 gap-y-2 mt-1">
+              <div className="anim-fadeUp d-700 flex flex-wrap justify-center md:justify-start gap-x-5 gap-y-2 mt-1">
                 {TRUST_BADGES.map((b, i) => (
                   <div
                     key={b.label}
@@ -514,41 +553,28 @@ export default function HeroSection() {
                 ))}
               </div>
             )}
-
-
-
-
-
           </div>
 
-          {/* ════════ CENTER — Anna mascot ════════ */}
+          {/* ════════ CENTER — Anna mascot (desktop only slot) ════════ */}
           {mounted && (
             <div
-              className="hero-center flex flex-col items-center justify-end z-20 relative"
+              className="hero-center hidden md:flex flex-col items-center justify-end z-20 relative"
               style={{ width: "clamp(200px, 28vw, 340px)", alignSelf: "end" }}
-            >
-              {/* Speech bubble */}
-
-
-
-
-            </div>
+            />
           )}
 
           {/* ════════ RIGHT — product image ════════ */}
           {mounted && (
-            <div
-              className="hero-right flex flex-col items-center justify-end z-10 pb-16 relative"
-              style={{ alignSelf: "end" }}
-            >
+            <div className="hero-right flex flex-col items-center justify-end z-10 pb-0 md:pb-16 pt-6 md:pt-0 relative w-full">
+
               {/* "Crispy!" spinning badge */}
               <div
                 className="crispy-badge anim-crispBadge d-1000 absolute z-30"
-                style={{ top: "14%", right: "8%", cursor: "default" }}
+                style={{ top: "8%", right: "8%", cursor: "default" }}
               >
                 <div
                   style={{
-                    width: 72, height: 72, borderRadius: "50%",
+                    width: 64, height: 64, borderRadius: "50%",
                     background: "linear-gradient(135deg, #f5c518 0%, #fde68a 100%)",
                     border: "2.5px solid rgba(180,130,0,0.3)",
                     display: "flex", flexDirection: "column",
@@ -557,13 +583,9 @@ export default function HeroSection() {
                     transform: "rotate(12deg)",
                   }}
                 >
-                  <span style={{ fontSize: 11, fontWeight: 800, color: "#5a3a00", lineHeight: 1.2 }}>
-                    SO
-                  </span>
-                  <span style={{ fontSize: 13, fontWeight: 900, color: "#2a1800" }}>
-                    CRISPY
-                  </span>
-                  <span style={{ fontSize: 9, color: "#7a5000" }}>!!</span>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: "#5a3a00", lineHeight: 1.2 }}>SO</span>
+                  <span style={{ fontSize: 12, fontWeight: 900, color: "#2a1800" }}>CRISPY</span>
+                  <span style={{ fontSize: 8, color: "#7a5000" }}>!!</span>
                 </div>
               </div>
 
@@ -572,7 +594,7 @@ export default function HeroSection() {
                 <div
                   className="anim-bubblePop absolute z-40"
                   style={{
-                    top: "28%", left: "-10%",
+                    top: "28%", left: "4%",
                     background: "white",
                     border: "1.5px solid rgba(245,197,24,0.4)",
                     borderRadius: "14px",
@@ -587,13 +609,12 @@ export default function HeroSection() {
                 </div>
               )}
 
-              {/* Product image */}
+              {/* Product image — fluid, no fixed px width breaking mobile */}
               <div
-                className="product-wrap anim-productEnter mt-20 anim-productFloat anim-productGlow flex items-center justify-center"
+                className="product-wrap anim-productEnter d-600 anim-productFloat anim-productGlow product-img-wrap"
                 onClick={handleProductClick}
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
-                style={{ position: "relative", height: "600px" }} // ✅ FIX
               >
                 {/* Glow backdrop */}
                 <div
@@ -605,110 +626,46 @@ export default function HeroSection() {
                   }}
                 />
 
-                {/* Default Image */}
-                {mounted && (
-                  <div
-                    className="hero-right flex flex-col items-center justify-end z-10 pb-16 relative"
-                    style={{ alignSelf: "end" }}
-                  >
-                    <div
-                      className="product-wrap anim-productEnter d-600 anim-productFloat anim-productGlow"
-                      onClick={handleProductClick}
-                      onMouseEnter={() => setHovered(true)}
-                      onMouseLeave={() => setHovered(false)}
-                      style={{
-                        position: "relative",
-                        width: "400px",
-                        height: "600px",
-                      }}
-                    >
-                      <div
-                        className="absolute inset-0 pointer-events-none"
-                        style={{
-                          background:
-                            "radial-gradient(ellipse 70% 90% at 50% 60%, rgba(245,197,24,0.22) 0%, transparent 70%)",
-                          borderRadius: "50%",
-                          transform: "scale(1.3)",
-                        }}
-                      />
+                <Image
+                  src="/anna-image2.png"
+                  alt="Default Product"
+                  fill
+                  priority
+                  sizes="(max-width: 640px) 80vw, (max-width: 900px) 360px, 400px"
+                  className={`object-contain transition-opacity duration-500 ${hovered ? "opacity-0" : "opacity-100"}`}
+                />
 
-                      <Image
-                        src="/anna-image2.png"
-                        alt="Default Product"
-                        fill
-                        priority
-                        sizes="400px"
-                        className={`object-contain transition-opacity duration-500 ${hovered ? "opacity-0" : "opacity-100"
-                          }`}
-                      />
+                <Image
+                  src="/product-hero.png"
+                  alt="Hover Product"
+                  fill
+                  priority
+                  sizes="(max-width: 640px) 80vw, (max-width: 900px) 360px, 400px"
+                  className={`object-contain transition-opacity duration-500 ${hovered ? "opacity-100" : "opacity-0"}`}
+                />
+              </div>
 
-                      <Image
-                        src="/product-hero.png"
-                        alt="Hover Product"
-                        fill
-                        priority
-                        sizes="600px"
-                        className={`object-contain transition-opacity duration-500 ${hovered ? "opacity-100" : "opacity-0"
-                          }`}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>              {/* Floating leaf decor */}
+              {/* Floating leaf decor */}
               <span
-                className="anim-leafSway absolute text-2xl pointer-events-none"
-                style={{ top: "22%", left: -20, opacity: 0.7, animationDelay: "0s" }}
+                className="anim-leafSway absolute text-xl pointer-events-none"
+                style={{ top: "22%", left: 0, opacity: 0.7, animationDelay: "0s" }}
               >🌿</span>
               <span
                 className="anim-leafSway absolute text-sm pointer-events-none"
-                style={{ top: "38%", right: -16, opacity: 0.5, animationDelay: "1.3s" }}
+                style={{ top: "42%", right: 0, opacity: 0.5, animationDelay: "1.3s" }}
               >🌿</span>
 
-              {/* Glow ring under Anna */}
+              {/* Glow ring under product */}
               <div
-                className=" ml-20 mb-70 absolute pointer-events-none"
+                className="absolute pointer-events-none"
                 style={{
                   bottom: 0, left: "50%",
                   transform: "translateX(-50%)",
-                  width: 180, height: 28,
+                  width: 160, height: 24,
                   borderRadius: "50%",
                   background: "radial-gradient(ellipse, rgba(26,122,74,0.20) 0%, transparent 70%)",
                 }}
               />
-              {/* Expanding ring animation */}
-              <div
-                className=" ml-20 mb-[260px] absolute pointer-events-none"
-                style={{
-                  bottom: 8, left: "50%",
-                  width: 130, height: 20,
-                  borderRadius: "50%",
-                  border: "1.5px solid rgba(26,122,74,0.25)",
-                  animation: "ringExpand 2.5s ease-out infinite",
-                }}
-              />
-
-
-              {/* Side badges */}
-              {/* <div className="flex  flex-col gap-2 mt-6">
-                {[
-                  { color: "#f0fdf4", border: "#bbf7d0", text: "#166534", label: "Pan-Gujarat Delivery" },
-                  { color: "#fffbeb", border: "#fde68a", text: "#92400e", label: "Premium Packaging" },
-                ].map((b, i) => (
-                  <div
-                    key={b.label}
-                    className="anim-badgeSlide mt-[-100px] flex  items-center  px-4 py-2 rounded-full"
-                    style={{
-                      background: b.color,
-                      border: `1.5px solid ${b.border}`,
-                      animationDelay: `${1.0 + i * 0.15}s`,
-                      boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
-                    }}
-                  >
-                    <span style={{ fontSize: 14 }}>{i === 0 ? "🚚" : "📦"}</span>
-                    <span style={{ fontSize: "0.75rem", fontWeight: 600, color: b.text }}>{b.label}</span>
-                  </div>
-                ))}
-              </div>*/}
             </div>
           )}
         </div>
@@ -728,11 +685,11 @@ export default function HeroSection() {
           >
             {/* Fade edges */}
             <div
-              className="absolute left-0 top-0 bottom-0 w-20 pointer-events-none z-10"
+              className="absolute left-0 top-0 bottom-0 w-12 sm:w-20 pointer-events-none z-10"
               style={{ background: "linear-gradient(to right, #1a7a4a, transparent)" }}
             />
             <div
-              className="absolute right-0 top-0 bottom-0 w-20 pointer-events-none z-10"
+              className="absolute right-0 top-0 bottom-0 w-12 sm:w-20 pointer-events-none z-10"
               style={{ background: "linear-gradient(to left, #1a7a4a, transparent)" }}
             />
             <div className="ticker-inner">

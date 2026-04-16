@@ -9,22 +9,20 @@ import PremiumProduct from "@/Component/Premiumproduct"
 import QualityBall from "@/Component/Qualityball"
 import RetailerBenefits from "@/Component/Retailerbenefits"
 
-
-function Home(){
-  return(
-
-    <>
-                <HeroSection/>
-                <AboutSection/>
-                <PremiumProduct/>
-                <QualityBall/>
-                <DistributorOpportunity/>
-                <RetailerBenefits/>
-                <OurGallery/>
-                <CustomerReviews/>
-                <ContactSection/>
-                <Footer/>
-    </>
-  )
+function Home() {
+  return (
+    <div className="overflow-x-hidden w-full">
+      <HeroSection />
+      <AboutSection />
+      <PremiumProduct />
+      <QualityBall />
+      <DistributorOpportunity />
+      <RetailerBenefits />
+      <OurGallery />
+      <CustomerReviews />
+      <ContactSection />
+      <Footer />
+    </div>
+  );
 }
-export default Home
+export default Home;
